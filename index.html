@@ -161,7 +161,7 @@
     <!-- PROBLEM SECTION -->
     <section class="py-24 bg-zinc-50 border-y border-zinc-100">
         <div class="max-w-4xl mx-auto px-6 text-center">
-            <h2 class="text-3xl font-semibold tracking-tight text-zinc-900 mb-6">
+            <h2 class="text-2xl md:text-3xl font-semibold tracking-tight text-zinc-900 mb-6">
                 A céges mozgás időt visz el. <br>
                 <span class="text-zinc-400">A bizonytalanság kockázatot jelent.</span>
             </h2>
@@ -369,39 +369,36 @@
                 <p class="text-zinc-400">Kérjen konzultációt vagy bemutatót a Fixer és Safex szolgáltatásokról.</p>
             </div>
 
+            <!-- Formspree form (active) -->
             <form method="POST" id="contact-form"
                 class="space-y-4 bg-zinc-800/50 p-8 rounded-2xl border border-zinc-700">
-                <input type="hidden" name="access_key" value="835a84f6-116d-40d7-9e71-6b5b81e615c2">
-                <input type="hidden" name="subject" value="Új ajánlatkérés – CARIX">
-                <input type="hidden" name="from_name" value="CARIX Weboldal">
-                <input type="hidden" name="replyto" value="info@carix.hu">
-                <input type="checkbox" name="botcheck" style="display: none;">
+                <input type="hidden" name="_subject" value="Új ajánlatkérés – CARIX">
 
                 <div class="grid md:grid-cols-2 gap-4">
                     <div class="space-y-1">
-                        <label for="company" class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Cégnév</label>
-                        <input type="text" id="company" name="company"
+                        <label for="fs-company" class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Cégnév</label>
+                        <input type="text" id="fs-company" name="company"
                             class="w-full bg-zinc-900 border border-zinc-700 rounded p-3 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-zinc-600"
                             placeholder="Vállalat neve">
                     </div>
                     <div class="space-y-1">
-                        <label for="name" class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Kapcsolattartó</label>
-                        <input type="text" id="name" name="name" required
+                        <label for="fs-name" class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Kapcsolattartó</label>
+                        <input type="text" id="fs-name" name="name" required
                             class="w-full bg-zinc-900 border border-zinc-700 rounded p-3 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-zinc-600"
                             placeholder="Teljes név">
                     </div>
                 </div>
 
                 <div class="space-y-1">
-                    <label for="email" class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Email</label>
-                    <input type="email" id="email" name="email" required
+                    <label for="fs-email" class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Email</label>
+                    <input type="email" id="fs-email" name="email" required
                         class="w-full bg-zinc-900 border border-zinc-700 rounded p-3 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-zinc-600"
                         placeholder="nev@ceg.hu">
                 </div>
 
                 <div class="space-y-1">
-                    <label for="message" class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Üzenet</label>
-                    <textarea id="message" name="message" rows="4" required
+                    <label for="fs-message" class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Üzenet</label>
+                    <textarea id="fs-message" name="message" rows="4" required
                         class="w-full bg-zinc-900 border border-zinc-700 rounded p-3 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-zinc-600"
                         placeholder="Rövid leírás az igényekről..."></textarea>
                 </div>
@@ -416,6 +413,18 @@
                 </div>
                 <div id="form-result" class="text-sm text-center pt-2 hidden"></div>
             </form>
+
+            <!-- Web3Forms form (kept for testing, hidden) -->
+            <!--
+            <form method="POST" id="web3forms-form"
+                class="space-y-4 bg-zinc-800/50 p-8 rounded-2xl border border-zinc-700">
+                <input type="hidden" name="access_key" value="835a84f6-116d-40d7-9e71-6b5b81e615c2">
+                <input type="hidden" name="subject" value="Új ajánlatkérés – CARIX">
+                <input type="hidden" name="from_name" value="CARIX Weboldal">
+                <input type="checkbox" name="botcheck" style="display: none;">
+                ... (same fields as above, targeting https://api.web3forms.com/submit)
+            </form>
+            -->
         </div>
     </section>
 
@@ -450,18 +459,19 @@
             submitBtn.textContent = "Küldés...";
             result.classList.add("hidden");
 
-            fetch("https://api.web3forms.com/submit", {
+            fetch("https://formspree.io/f/mojnkwjw", {
                 method: "POST",
                 body: formData,
+                headers: { "Accept": "application/json" },
             })
                 .then(async (response) => {
-                    const json = await response.json();
                     if (response.ok) {
                         result.textContent = "Köszönjük! Hamarosan felvesszük Önnel a kapcsolatot.";
                         result.className = "text-sm text-center pt-2 text-green-400";
                         form.reset();
                     } else {
-                        result.textContent = json.message || "Hiba történt. Kérjük, próbálja újra.";
+                        const json = await response.json();
+                        result.textContent = (json.errors && json.errors.map(e => e.message).join(", ")) || "Hiba történt. Kérjük, próbálja újra.";
                         result.className = "text-sm text-center pt-2 text-red-400";
                     }
                 })
